@@ -1,108 +1,115 @@
 import { ProcessingStatusResponse, UploadUrlResponse } from '../types';
 
-// ─── API Configuration ───────────────────────────────────────────────────────
-// TODO: Move to environment variables (e.g., VITE_API_BASE_URL)
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
-
-// ─── Audiobook Service ───────────────────────────────────────────────────────
+const CONVERT_URL = import.meta.env.VITE_API_CONVERT_URL;
+const STATUS_URL = import.meta.env.VITE_API_STATUS_URL;
 
 export const audiobookService = {
   /**
    * Requests a presigned S3 upload URL from the backend.
-   *
-   * TODO: Replace simulation with:
-   *   POST ${API_BASE_URL}/api/upload-url
-   *   Body: { fileName, fileType, fileSize }
-   *   Returns: { uploadUrl, jobId }
    */
   getUploadUrl: async (
     fileName: string,
     fileType: string,
-    fileSize: number
+    _fileSize: number
   ): Promise<UploadUrlResponse> => {
-    // Simulated network delay
-    await delay(300);
-    return {
-      uploadUrl: `https://s3.amazonaws.com/your-bucket/${fileName}?presigned=TODO`,
-      jobId: `job_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    };
+    console.log('[audiobookService] Requesting upload URL:', { fileName, fileType });
+    
+    try {
+      const response = await fetch(CONVERT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName, fileType }),
+      });
+
+      console.log('[audiobookService] Response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[audiobookService] Error response body:', errorText);
+        throw new Error(`Failed to get upload URL: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('[audiobookService] Upload URL received:', data);
+      return data;
+    } catch (error) {
+      console.error('[audiobookService] Fetch error:', error);
+      throw error;
+    }
   },
 
   /**
    * Uploads a file directly to S3 using a presigned URL.
-   * Reports upload progress via callback.
-   *
-   * TODO: Replace simulation with:
-   *   PUT ${uploadUrl}
-   *   Headers: { 'Content-Type': file.type }
-   *   Body: file (binary)
-   *   Use XMLHttpRequest to track upload progress via xhr.upload.onprogress
    */
   uploadToStorage: async (
     file: File,
     uploadUrl: string,
-    onProgress: (progress: number) => void
+    onProgress?: (progress: number) => void
   ): Promise<void> => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const totalDuration = 2200; // ms
-      const intervalMs = 80;
-      const steps = totalDuration / intervalMs;
-      const increment = 100 / steps;
+    console.log('[audiobookService] Uploading binary file to S3:', { name: file.name, type: file.type, size: file.size });
+    
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
 
-      const interval = setInterval(() => {
-        progress = Math.min(progress + increment + Math.random() * increment * 0.5, 100);
-        onProgress(Math.round(progress));
-
-        if (progress >= 100) {
-          clearInterval(interval);
-          onProgress(100);
-          resolve();
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable && onProgress) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          onProgress(percentComplete);
         }
-      }, intervalMs);
+      };
+
+      xhr.onload = () => {
+        console.log('[audiobookService] S3 Upload status:', xhr.status);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`S3 upload failed with status ${xhr.status}`));
+        }
+      };
+
+      xhr.onerror = () => {
+        console.error('[audiobookService] S3 Upload network error');
+        reject(new Error('S3 upload network error'));
+      };
+
+      xhr.open('PUT', uploadUrl);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
     });
   },
 
   /**
    * Polls the backend for audiobook processing status.
-   *
-   * TODO: Replace simulation with:
-   *   GET ${API_BASE_URL}/api/jobs/${jobId}/status
-   *   Returns: { jobId, status, audioUrl?, error? }
-   *
-   *   Consider using WebSocket or Server-Sent Events (SSE) for real-time updates
-   *   instead of polling, to reduce latency and backend load.
-   *
-   * AWS Architecture note:
-   *   - File lands in S3 → triggers Lambda → Lambda invokes Polly/TTS → outputs MP3 to S3
-   *   - Lambda updates DynamoDB with job status
-   *   - Frontend polls API Gateway → Lambda → DynamoDB
    */
   pollProcessingStatus: async (jobId: string): Promise<ProcessingStatusResponse> => {
-    // Simulate processing time (3–4 seconds for TTS generation)
-    const processingTime = 3000 + Math.random() * 1000;
-    await delay(processingTime);
+    console.log('[audiobookService] Polling status for jobId:', jobId);
+    
+    try {
+      const response = await fetch(`${STATUS_URL}?jobId=${jobId}`);
+      console.log('[audiobookService] Polling response status:', response.status);
 
-    // TODO: Replace with actual presigned S3 URL from the backend response
-    return {
-      jobId,
-      status: 'completed',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    };
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[audiobookService] Polling error response body:', errorText);
+        throw new Error(`Failed to get job status: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('[audiobookService] Job status data:', data);
+      return data;
+    } catch (error) {
+      console.error('[audiobookService] Polling error:', error);
+      throw error;
+    }
   },
 
   /**
    * Cancels an in-progress job.
-   *
-   * TODO: Replace simulation with:
-   *   DELETE ${API_BASE_URL}/api/jobs/${jobId}
    */
   cancelJob: async (jobId: string): Promise<void> => {
-    await delay(200);
-    // TODO: Call backend to cancel job and clean up S3 resources
+    console.log('[audiobookService] Canceling job:', jobId);
+    await delay(100);
   },
 };
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));

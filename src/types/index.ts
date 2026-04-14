@@ -1,6 +1,13 @@
 // ─── Upload & Processing Status ─────────────────────────────────────────────
 
-export type UploadStatus = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
+export type UploadStatus =
+  | 'idle'
+  | 'uploading'
+  | 'processing'
+  | 'processing_text'
+  | 'generating_audio'
+  | 'completed'
+  | 'error';
 
 // ─── Audiobook Item ──────────────────────────────────────────────────────────
 
