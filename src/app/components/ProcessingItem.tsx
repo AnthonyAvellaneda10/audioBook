@@ -45,7 +45,11 @@ function getFileIcon(type: string) {
 export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const Icon = getFileIcon(item.fileType);
-  const isActive = item.status === 'uploading' || item.status === 'processing';
+  const isActive =
+    item.status === 'uploading' ||
+    item.status === 'processing' ||
+    item.status === 'processing_text' ||
+    item.status === 'generating_audio';
 
   return (
     <motion.li
@@ -82,7 +86,9 @@ export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
       )}
 
       {/* Processing shimmer (processing state) */}
-      {item.status === 'processing' && (
+      {(item.status === 'processing' ||
+        item.status === 'processing_text' ||
+        item.status === 'generating_audio') && (
         <div className="h-0.5 bg-muted overflow-hidden" aria-hidden="true">
           <motion.div
             className="h-full w-1/3 bg-amber-400/70 rounded-full"

@@ -29,6 +29,20 @@ const STATUS_CONFIG = {
     iconClass: 'text-amber-500 dark:text-amber-400',
     spin: true,
   },
+  processing_text: {
+    label: 'Processing text...',
+    icon: Loader2,
+    className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    iconClass: 'text-amber-500 dark:text-amber-400',
+    spin: true,
+  },
+  generating_audio: {
+    label: 'Generating audio...',
+    icon: Loader2,
+    className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    iconClass: 'text-amber-500 dark:text-amber-400',
+    spin: true,
+  },
   completed: {
     label: 'Completed',
     icon: CheckCircle2,
