@@ -79,13 +79,19 @@ export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
         </div>
       )}
 
-      {/* Processing shimmer — shown for ALL non-terminal, non-upload statuses */}
+      {/* Processing shimmer — sweeps the full card width for ALL active statuses */}
       {isAnimating && (
-        <div className="h-0.5 bg-muted overflow-hidden" aria-hidden="true">
+        <div className="relative h-0.5 bg-muted overflow-hidden" aria-hidden="true">
           <motion.div
-            className="h-full w-1/3 bg-amber-400/70 rounded-full"
-            animate={{ x: ['-100%', '400%'] }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute top-0 h-full w-1/3 bg-amber-400/80 rounded-full"
+            initial={{ left: '-33%' }}
+            animate={{ left: ['-33%', '100%'] }}
+            transition={{
+              duration: 1.4,
+              repeat: Infinity,
+              repeatDelay: 0.2,
+              ease: 'easeInOut',
+            }}
           />
         </div>
       )}
