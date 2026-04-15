@@ -8,7 +8,7 @@ import { ProcessingList } from './components/ProcessingList';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
-  const { items, startUpload, removeItem } = useProcessingList();
+  const { items, startUpload, removeItem, nextPage, loadingMore, loadMore } = useProcessingList();
 
   // Ref to scroll to the upload section when CTA is clicked
   const uploadSectionRef = useRef<HTMLElement>(null);
@@ -60,7 +60,13 @@ export default function App() {
         </div>
 
         {/* Processing list */}
-        <ProcessingList items={items} onRemove={removeItem} />
+        <ProcessingList
+          items={items}
+          onRemove={removeItem}
+          nextPage={nextPage}
+          loadingMore={loadingMore}
+          onLoadMore={loadMore}
+        />
       </main>
 
       {/* Footer */}
