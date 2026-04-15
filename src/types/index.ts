@@ -39,6 +39,20 @@ export interface ProcessingStatusResponse {
   /** Presigned S3 URL for the generated MP3 */
   audioUrl?: string;
   error?: string;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  timestamp?: string;
+}
+
+export interface PaginationMetadata {
+  startKey?: string;
+  startAt?: string;
+}
+
+export interface PaginatedResponse {
+  items: ProcessingStatusResponse[];
+  nextPage?: PaginationMetadata;
 }
 
 // ─── File Validation ─────────────────────────────────────────────────────────
