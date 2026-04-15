@@ -1,20 +1,44 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { BookOpen, InboxIcon } from 'lucide-react';
-import { AudiobookItem } from '../../types';
+import { BookOpen, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { AudiobookItem, PaginationMetadata } from '../../types';
 import { ProcessingItem } from './ProcessingItem';
+import { SkeletonItem } from './SkeletonItem';
 
 interface ProcessingListProps {
-  items: AudiobookItem[];
+  /** null = initial loading, [] = loaded but empty, [...] = has data */
+  items: AudiobookItem[] | null;
   onRemove: (id: string) => void;
+  nextPage?: PaginationMetadata;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
-export function ProcessingList({ items, onRemove }: ProcessingListProps) {
-  if (items.length === 0) return null;
+const SKELETON_COUNT = 3;
 
-  const completedCount = items.filter((i) => i.status === 'completed').length;
-  const activeCount = items.filter(
-    (i) => i.status === 'uploading' || i.status === 'processing'
+export function ProcessingList({
+  items,
+  onRemove,
+  nextPage,
+  loadingMore = false,
+  onLoadMore,
+}: ProcessingListProps) {
+  const isInitialLoading = items === null;
+  const isEmpty = !isInitialLoading && items.length === 0;
+
+  // Don't render anything if the initial load is done and there's nothing
+  if (isEmpty) return null;
+
+  const completedCount = (items ?? []).filter((i) => i.status === 'completed').length;
+  const activeCount    = (items ?? []).filter(
+    (i) =>
+      i.status === 'uploading' ||
+      i.status === 'processing' ||
+      i.status === 'processing_text' ||
+      i.status === 'generating_audio'
   ).length;
+
+  const hasNextPage  = !!nextPage?.startKey;
+  const hasPrevPage  = false; // We only append, so previous is always in the existing list
 
   return (
     <section
@@ -66,24 +90,69 @@ export function ProcessingList({ items, onRemove }: ProcessingListProps) {
         aria-label="Uploaded audiobook files"
         aria-live="polite"
         aria-relevant="additions removals"
+        aria-busy={isInitialLoading}
       >
-        <AnimatePresence initial={false}>
-          {items.map((item) => (
-            <ProcessingItem key={item.id} item={item} onRemove={onRemove} />
-          ))}
-        </AnimatePresence>
+        {isInitialLoading ? (
+          /* Skeleton screens during initial load */
+          Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <SkeletonItem key={`skeleton-${i}`} />
+          ))
+        ) : (
+          <AnimatePresence initial={false}>
+            {items.map((item) => (
+              <ProcessingItem key={item.id} item={item} onRemove={onRemove} />
+            ))}
+          </AnimatePresence>
+        )}
       </ul>
 
-      {/* Empty state (should not appear since we check items.length above, kept for completeness) */}
-      {items.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center py-12 text-muted-foreground gap-3"
-        >
-          <InboxIcon size={32} className="opacity-40" aria-hidden="true" />
-          <p className="text-sm">No files uploaded yet</p>
-        </motion.div>
+      {/* Pagination controls */}
+      {!isInitialLoading && (hasNextPage || hasPrevPage) && (
+        <div className="flex items-center justify-center gap-3 mt-6">
+          {/* Previous — always disabled since we append-only */}
+          <button
+            disabled
+            aria-label="Previous page"
+            className="
+              inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm
+              border border-border text-muted-foreground
+              opacity-40 cursor-not-allowed
+            "
+            style={{ fontWeight: 500 }}
+          >
+            <ChevronLeft size={15} aria-hidden="true" />
+            Previous
+          </button>
+
+          {/* Load More */}
+          <button
+            onClick={onLoadMore}
+            disabled={loadingMore || !hasNextPage}
+            aria-label="Load more audiobooks"
+            className="
+              inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm
+              border border-border
+              transition-all duration-150
+              hover:bg-muted/50
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+              disabled:opacity-40 disabled:cursor-not-allowed
+              cursor-pointer
+            "
+            style={{ fontWeight: 500 }}
+          >
+            {loadingMore ? (
+              <>
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                Loading…
+              </>
+            ) : (
+              <>
+                Next
+                <ChevronRight size={15} aria-hidden="true" />
+              </>
+            )}
+          </button>
+        </div>
       )}
     </section>
   );
