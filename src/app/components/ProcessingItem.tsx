@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { AudiobookItem } from '../../types';
+import { formatBytes } from '../../utils/fileUtils';
 import { AudioPlayer } from './AudioPlayer';
 import { StatusBadge } from './StatusBadge';
 
@@ -19,13 +20,6 @@ interface ProcessingItemProps {
   onRemove: (id: string) => void;
 }
 
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-}
 
 function formatTimestamp(date: Date): string {
   return new Intl.DateTimeFormat('en-US', {
@@ -45,11 +39,11 @@ function getFileIcon(type: string) {
 export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const Icon = getFileIcon(item.fileType);
-  const isActive =
-    item.status === 'uploading' ||
-    item.status === 'processing' ||
-    item.status === 'processing_text' ||
-    item.status === 'generating_audio';
+
+  // Any status that is NOT a terminal/known-idle state gets the active indicators
+  const isActive   = item.status !== 'completed' && item.status !== 'error' && item.status !== 'idle';
+  // Uploading gets the deterministic progress bar; everything else gets the shimmer
+  const isAnimating = isActive && item.status !== 'uploading';
 
   return (
     <motion.li
@@ -85,10 +79,8 @@ export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
         </div>
       )}
 
-      {/* Processing shimmer (processing state) */}
-      {(item.status === 'processing' ||
-        item.status === 'processing_text' ||
-        item.status === 'generating_audio') && (
+      {/* Processing shimmer — shown for ALL non-terminal, non-upload statuses */}
+      {isAnimating && (
         <div className="h-0.5 bg-muted overflow-hidden" aria-hidden="true">
           <motion.div
             className="h-full w-1/3 bg-amber-400/70 rounded-full"
