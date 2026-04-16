@@ -182,33 +182,31 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
 
       {/* Upload button */}
       <AnimatePresence>
-        {selectedFile && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2 }}
-            className="mt-4"
-          >
-            <button
-              onClick={handleUpload}
-              aria-label={`Upload ${selectedFile.name} and convert to audiobook`}
-              className={cn(
-                "w-full inline-flex items-center justify-center gap-2",
-                "px-5 py-3 rounded-xl",
-                "bg-primary text-primary-foreground",
-                "transition-all duration-200",
-                "hover:opacity-90 hover:shadow-lg hover:shadow-primary/20",
-                "active:opacity-80",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                "cursor-pointer font-semibold",
-              )}
+        {selectedFile && (() => {
+          const uploadBtnClass = cn(
+            "w-full inline-flex items-center justify-center gap-2",
+            "px-5 py-3 rounded-xl bg-primary text-primary-foreground",
+            "transition-all duration-200 cursor-pointer font-semibold",
+            "hover:opacity-90 hover:shadow-lg hover:shadow-primary/20",
+            "active:opacity-80",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          );
+          const uploadBtnLabel = `Upload ${selectedFile.name} and convert to audiobook`;
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.2 }}
+              className="mt-4"
             >
-              <UploadCloud size={16} aria-hidden="true" />
-              Convert to Audiobook
-            </button>
-          </motion.div>
-        )}
+              <button onClick={handleUpload} aria-label={uploadBtnLabel} className={uploadBtnClass}>
+                <UploadCloud size={16} aria-hidden="true" />
+                Convert to Audiobook
+              </button>
+            </motion.div>
+          );
+        })()}
       </AnimatePresence>
     </section>
   );
