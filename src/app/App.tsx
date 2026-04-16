@@ -82,7 +82,6 @@ export default function App() {
       >
         <p>
           AudioBook AI — Convert documents to audiobooks instantly.
-          {/* TODO: Add links to privacy policy, terms of service, and support */}
         </p>
         <p className="mt-1 opacity-60">
           © {new Date().getFullYear()} AudioBook AI. All rights reserved.
