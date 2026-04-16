@@ -94,8 +94,8 @@ export function ProcessingList({
       >
         {isInitialLoading ? (
           /* Skeleton screens during initial load */
-          Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-            <SkeletonItem key={`skeleton-${i}`} />
+          Array.from({ length: SKELETON_COUNT }, (_, i) => (
+            <SkeletonItem key={`skeleton-item-${i}`} />
           ))
         ) : (
           <AnimatePresence initial={false}>

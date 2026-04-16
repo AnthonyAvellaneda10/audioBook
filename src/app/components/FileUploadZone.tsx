@@ -33,12 +33,25 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     if ((e.key === 'Enter' || e.key === ' ') && !selectedFile) {
       e.preventDefault();
       openFilePicker();
     }
   };
+
+  const uploadBtnClass = cn(
+    "w-full inline-flex items-center justify-center gap-2",
+    "px-5 py-3 rounded-xl bg-primary text-primary-foreground",
+    "transition-all duration-200 cursor-pointer font-semibold",
+    "hover:opacity-90 hover:shadow-lg hover:shadow-primary/20",
+    "active:opacity-80",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+  );
+
+  const uploadBtnLabel = selectedFile 
+    ? `Upload ${selectedFile.name} and convert to audiobook` 
+    : "";
 
   return (
     <section
@@ -61,9 +74,8 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
       </div>
 
       {/* Drop zone */}
-      <div
-        role="button"
-        tabIndex={0}
+      <button
+        type="button"
         aria-label="Drag and drop your file here, or press Enter to browse"
         aria-describedby={validationError ? 'upload-error' : undefined}
         onDragOver={handleDragOver}
@@ -71,20 +83,17 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
         onDrop={handleDrop}
         onKeyDown={handleKeyDown}
         onClick={!selectedFile ? openFilePicker : undefined}
-        className={`
-          relative flex flex-col items-center justify-center
-          w-full min-h-48 rounded-2xl
-          border-2 border-dashed
-          transition-all duration-200
-          cursor-pointer
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-          ${
-            isDragging
-              ? 'border-primary bg-primary/8 scale-[1.01]'
-              : 'border-primary/25 hover:border-primary/50 hover:bg-primary/5 bg-white dark:bg-muted/20'
-          }
-          ${selectedFile ? 'cursor-default' : ''}
-        `}
+        className={cn(
+          "relative flex flex-col items-center justify-center",
+          "w-full min-h-48 rounded-2xl",
+          "border-2 border-dashed",
+          "transition-all duration-200",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          isDragging
+            ? "border-primary bg-primary/8 scale-[1.01] cursor-pointer"
+            : "border-primary/25 hover:border-primary/50 hover:bg-primary/5 bg-white dark:bg-muted/20 cursor-pointer",
+          selectedFile && "cursor-default",
+        )}
       >
         {/* Hidden file input */}
         <input
@@ -158,7 +167,7 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </button>
 
       {/* Validation error */}
       <AnimatePresence>
@@ -182,31 +191,25 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
 
       {/* Upload button */}
       <AnimatePresence>
-        {selectedFile && (() => {
-          const uploadBtnClass = cn(
-            "w-full inline-flex items-center justify-center gap-2",
-            "px-5 py-3 rounded-xl bg-primary text-primary-foreground",
-            "transition-all duration-200 cursor-pointer font-semibold",
-            "hover:opacity-90 hover:shadow-lg hover:shadow-primary/20",
-            "active:opacity-80",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          );
-          const uploadBtnLabel = `Upload ${selectedFile.name} and convert to audiobook`;
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2 }}
-              className="mt-4"
+        {selectedFile && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2 }}
+            className="mt-4"
+          >
+            <button 
+              type="button"
+              onClick={handleUpload} 
+              aria-label={uploadBtnLabel} 
+              className={uploadBtnClass}
             >
-              <button onClick={handleUpload} aria-label={uploadBtnLabel} className={uploadBtnClass}>
-                <UploadCloud size={16} aria-hidden="true" />
-                Convert to Audiobook
-              </button>
-            </motion.div>
-          );
-        })()}
+              <UploadCloud size={16} aria-hidden="true" />
+              Convert to Audiobook
+            </button>
+          </motion.div>
+        )}
       </AnimatePresence>
     </section>
   );

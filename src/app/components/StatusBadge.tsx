@@ -75,8 +75,7 @@ export function StatusBadge({ status, progress }: StatusBadgeProps) {
       : config.label;
 
   return (
-    <span
-      role="status"
+    <output
       aria-label={displayLabel}
       className={`
         inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs
@@ -90,6 +89,6 @@ export function StatusBadge({ status, progress }: StatusBadgeProps) {
         className={`${config.iconClass} ${config.spin ? 'animate-spin' : ''}`}
       />
       {displayLabel}
-    </span>
+    </output>
   );
 }

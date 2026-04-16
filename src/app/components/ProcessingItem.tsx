@@ -63,20 +63,12 @@ export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
     >
       {/* Upload progress bar (uploading state only) */}
       {item.status === 'uploading' && (
-        <div
-          className="h-0.5 bg-muted"
-          role="progressbar"
+        <progress
+          className="h-0.5 w-full bg-muted [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500"
           aria-label={`Upload progress: ${item.progress}%`}
-          aria-valuenow={item.progress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        >
-          <motion.div
-            className="h-full bg-blue-500"
-            style={{ width: `${item.progress}%` }}
-            transition={{ ease: 'linear' }}
-          />
-        </div>
+          value={item.progress}
+          max={100}
+        />
       )}
 
       {/* Processing shimmer — sweeps the full card width for ALL active statuses */}

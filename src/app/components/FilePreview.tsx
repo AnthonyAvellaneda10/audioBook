@@ -39,7 +39,7 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
   const label = getFileLabel(file.type, file.name);
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8, scale: 0.97 }}
@@ -48,7 +48,6 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
         flex items-center gap-3 p-3.5 rounded-xl
         bg-muted/60 border border-border
       "
-      role="region"
       aria-label={`Selected file: ${file.name}`}
     >
       {/* File icon */}
@@ -93,6 +92,6 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
       >
         <X size={14} aria-hidden="true" />
       </button>
-    </motion.div>
+    </motion.section>
   );
 }

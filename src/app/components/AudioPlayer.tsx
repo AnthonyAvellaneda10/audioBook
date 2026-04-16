@@ -24,7 +24,7 @@ export function AudioPlayer({ audioUrl, fileName }: AudioPlayerProps) {
     seekByPercent(Math.max(0, Math.min(100, percent)));
   };
 
-  const handleProgressKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleProgressKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowRight') seekByPercent(Math.min(progress + 2, 100));
     if (e.key === 'ArrowLeft') seekByPercent(Math.max(progress - 2, 0));
   };
@@ -71,41 +71,23 @@ export function AudioPlayer({ audioUrl, fileName }: AudioPlayerProps) {
         </p>
       ) : (
         <>
-          {/* Progress bar */}
-          <div
-            role="slider"
-            aria-label="Playback position"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(progress)}
-            aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
-            tabIndex={0}
-            onClick={handleProgressClick}
-            onKeyDown={handleProgressKeyDown}
-            className="
-              group relative h-1.5 w-full rounded-full
-              bg-muted cursor-pointer
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-              mb-3
-            "
-          >
-            <motion.div
-              className="absolute inset-y-0 left-0 rounded-full bg-primary dark:bg-blue-400"
-              style={{ width: `${progress}%` }}
-              transition={{ ease: 'linear' }}
-            />
-            {/* Thumb */}
-            <div
-              className="
-                absolute top-1/2 -translate-y-1/2 -translate-x-1/2
-                w-3 h-3 rounded-full
-                bg-primary dark:bg-blue-400
-                opacity-0 group-hover:opacity-100
-                transition-opacity duration-150
-                shadow-sm
-              "
-              style={{ left: `${progress}%` }}
-              aria-hidden="true"
+          {/* Progress bar — native range input for proper a11y and cross-device support */}
+          <div className="relative mb-3">
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={Math.round(progress)}
+              aria-label={`Playback position: ${formatTime(currentTime)} of ${formatTime(duration)}`}
+              aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
+              onChange={(e) => seekByPercent(Number(e.target.value))}
+              onKeyDown={handleProgressKeyDown}
+              className="w-full h-1.5 appearance-none rounded-full bg-muted cursor-pointer
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              style={{
+                background: `linear-gradient(to right, var(--color-primary) ${progress}%, var(--color-muted) ${progress}%)`,
+              }}
             />
           </div>
 
@@ -132,16 +114,11 @@ export function AudioPlayer({ audioUrl, fileName }: AudioPlayerProps) {
                 cursor-pointer
               "
             >
-              {isLoading ? (
-                <span
-                  className="w-3.5 h-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"
-                  aria-hidden="true"
-                />
-              ) : isPlaying ? (
-                <Pause size={14} fill="currentColor" aria-hidden="true" />
-              ) : (
-                <Play size={14} fill="currentColor" aria-hidden="true" />
-              )}
+            {(() => {
+              if (isLoading) return <span className="w-3.5 h-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" aria-hidden="true" />;
+              if (isPlaying) return <Pause size={14} fill="currentColor" aria-hidden="true" />;
+              return <Play size={14} fill="currentColor" aria-hidden="true" />;
+            })()}
             </button>
 
             <span className="text-xs text-muted-foreground tabular-nums">
