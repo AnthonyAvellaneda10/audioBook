@@ -1,0 +1,23 @@
+# ===========================================
+# SonarQube Configuration - EXAMPLE FILE
+# Copy this file to sonar-project.properties
+# and fill in your actual values.
+# sonar-project.properties is git-ignored.
+# ===========================================
+
+sonar.projectKey=YOUR_PROJECT_KEY
+sonar.projectName=YOUR_PROJECT_NAME
+sonar.projectVersion=1.0
+
+# SonarQube server URL
+sonar.host.url=http://localhost:9000
+
+# Authentication token (generate one in SonarQube > My Account > Security)
+sonar.token=YOUR_SONARQUBE_TOKEN
+
+# Sources
+sonar.sources=src
+sonar.exclusions=**/node_modules/**,**/dist/**,**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/coverage/**
+
+# Language
+sonar.language=ts
