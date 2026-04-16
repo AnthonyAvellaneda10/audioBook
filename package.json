@@ -6,6 +6,7 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "sonar": "sonar",
     "preview": "vite preview"
   },
   "dependencies": {
