@@ -121,6 +121,21 @@ src/
     └── fileUtils.ts               # formatBytes() utility
 ```
 
+## ♿ Accessibility Standards (WCAG 2.1 A)
+
+All UI components follow semantic HTML and ARIA best practices validated through SonarQube:
+
+| Component | Practice Applied |
+|---|---|
+| `AudioPlayer` | Native `<input type="range">` for seek bar — keyboard and screen-reader friendly |
+| `FileUploadZone` | Drop zone implemented as `<button>` — fully keyboard and AT accessible |
+| `FilePreview` | `<section aria-label>` instead of `div[role=region]` |
+| `ProcessingItem` | Native `<progress>` element for upload indicator |
+| `StatusBadge` | Native `<output>` element for live status text |
+| `breadcrumb` | `aria-current="page"` + `aria-hidden="true"` without redundant ARIA roles |
+| `CardTitle` | `<h4>` with `aria-label` fallback for empty-content edge-case |
+| `Table` | `<table>` with `aria-label` + hidden `<caption>` for screen readers |
+
 ## 🔍 Code Quality — SonarQube
 
 This project integrates [SonarQube](https://www.sonarsource.com/products/sonarqube/) for static code analysis (bugs, vulnerabilities, code smells, and duplications).
@@ -161,4 +176,5 @@ npm run sonar
 Results are available at: **http://localhost:9000/dashboard?id=AudioBookAPI**
 
 ---
-*Original UI design based on the Audiobook Generator Web App community design.*
+*Original UI design based on the Audiobook Generator Web App community design.*
+
