@@ -12,10 +12,17 @@ function Table({ className, "aria-label": ariaLabel, ...props }: React.Component
     >
       <table
         data-slot="table"
+        role="table" // Ayuda a algunos linters a identificar el rol semántico
         className={cn("w-full caption-bottom text-sm", className)}
-        aria-label={ariaLabel ?? "Data table"}
+        aria-label={ariaLabel ?? "Tabla de datos"}
         {...props}
-      />
+      >
+        {/* Si pasas un aria-label, lo ideal es que esté disponible para 
+          lectores de pantalla dentro de un caption si el linter sigue molestando 
+        */}
+        <caption className="sr-only">{ariaLabel ?? "Tabla de datos"}</caption>
+        {props.children}
+      </table>
     </div>
   );
 }
