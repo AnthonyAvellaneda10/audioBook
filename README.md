@@ -121,15 +121,44 @@ src/
     └── fileUtils.ts               # formatBytes() utility
 ```
 
-## ✨ Design Decisions
+## 🔍 Code Quality — SonarQube
 
-| Pattern | Rationale |
-|---|---|
-| `items = null` on init | Distinguishes "loading" from "loaded but empty" for skeleton rendering |
-| `upsertItem` by `jobId` | Prevents duplicates between optimistic local items and history results |
-| `pollingRef` Set | Prevents double-polling the same job across renders / StrictMode |
-| `isTerminal()` helper | Any unknown backend status is treated as "in progress" automatically |
-| `requestPlayback()` TTL | Pre-signed URLs expire; refreshing before play prevents silent failures |
+This project integrates [SonarQube](https://www.sonarsource.com/products/sonarqube/) for static code analysis (bugs, vulnerabilities, code smells, and duplications).
+
+### Prerequisites
+
+- A running SonarQube instance (default: `http://localhost:9000`).
+- The `@sonar/scan` CLI installed globally:
+
+```bash
+npm install -g @sonar/scan
+```
+
+### Setup
+
+Copy the example config and fill in your values:
+
+```bash
+cp sonar-project.properties.example sonar-project.properties
+```
+
+Edit `sonar-project.properties` with your project key and token (generated in **SonarQube → My Account → Security**):
+
+```properties
+sonar.projectKey=AudioBookAPI
+sonar.host.url=http://localhost:9000
+sonar.token=YOUR_SONARQUBE_TOKEN
+```
+
+> ⚠️ `sonar-project.properties` is git-ignored — never commit your token.
+
+### Run Analysis
+
+```bash
+npm run sonar
+```
+
+Results are available at: **http://localhost:9000/dashboard?id=AudioBookAPI**
 
 ---
-*Original UI design based on the Audiobook Generator Web App community design.*
+*Original UI design based on the Audiobook Generator Web App community design.*
