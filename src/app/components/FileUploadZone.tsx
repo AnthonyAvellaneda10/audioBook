@@ -5,6 +5,7 @@ import { useFileUpload } from '../../hooks/useFileUpload';
 import { ACCEPTED_EXTENSIONS } from '../../types';
 import { AlertMessage } from './AlertMessage';
 import { FilePreview } from './FilePreview';
+import { cn } from './ui/utils';
 
 interface FileUploadZoneProps {
   onUpload: (file: File) => void;
@@ -192,17 +193,16 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
             <button
               onClick={handleUpload}
               aria-label={`Upload ${selectedFile.name} and convert to audiobook`}
-              className="
-                w-full inline-flex items-center justify-center gap-2
-                px-5 py-3 rounded-xl
-                bg-primary text-primary-foreground
-                transition-all duration-200
-                hover:opacity-90 hover:shadow-lg hover:shadow-primary/20
-                active:opacity-80
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-                cursor-pointer
-              "
-              style={{ fontWeight: 600 }}
+              className={cn(
+                "w-full inline-flex items-center justify-center gap-2",
+                "px-5 py-3 rounded-xl",
+                "bg-primary text-primary-foreground",
+                "transition-all duration-200",
+                "hover:opacity-90 hover:shadow-lg hover:shadow-primary/20",
+                "active:opacity-80",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "cursor-pointer font-semibold",
+              )}
             >
               <UploadCloud size={16} aria-hidden="true" />
               Convert to Audiobook
