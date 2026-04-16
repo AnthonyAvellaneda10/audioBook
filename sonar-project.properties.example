@@ -15,9 +15,11 @@ sonar.host.url=http://localhost:9000
 # Authentication token (generate one in SonarQube > My Account > Security)
 sonar.token=YOUR_SONARQUBE_TOKEN
 
-# Sources
+# Sources & exclusions
 sonar.sources=src
-sonar.exclusions=**/node_modules/**,**/dist/**,**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/coverage/**
+# Exclude test files, build artifacts, and Tailwind v4 CSS files that use
+# @source / @custom-variant at-rules not recognized by SonarQube (false positives)
+sonar.exclusions=**/node_modules/**,**/dist/**,**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/coverage/**,**/styles/tailwind.css,**/styles/theme.css
 
 # Language
 sonar.language=ts
