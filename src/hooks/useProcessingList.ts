@@ -212,8 +212,9 @@ export function useProcessingList() {
   // ── Upload flow ────────────────────────────────────────────────────────────
 
   const startUpload = useCallback(
-    async (file: File) => {
-      console.log('[useProcessingList] Starting upload for:', file.name);
+    async (file: File, targetLanguage: string) => {
+      console.log('[useProcessingList] Starting upload for:', file.name, 'in', targetLanguage);
+
       const localId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
       const newItem: AudiobookItem = {
@@ -233,8 +234,10 @@ export function useProcessingList() {
         const { uploadUrl, jobId } = await audiobookService.getUploadUrl(
           file.name,
           file.type,
-          file.size
+          file.size,
+          targetLanguage
         );
+
         upsertItem({ id: localId, jobId });
 
         await audiobookService.uploadToStorage(file, uploadUrl, (progress) => {

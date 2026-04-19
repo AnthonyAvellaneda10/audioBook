@@ -64,7 +64,7 @@ export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
       {/* Upload progress bar (uploading state only) */}
       {item.status === 'uploading' && (
         <progress
-          className="h-0.5 w-full bg-muted [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500"
+          className="block h-0.5 w-full bg-muted appearance-none [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-muted [&::-moz-progress-bar]:bg-blue-500"
           aria-label={`Upload progress: ${item.progress}%`}
           value={item.progress}
           max={100}
@@ -73,17 +73,9 @@ export function ProcessingItem({ item, onRemove }: ProcessingItemProps) {
 
       {/* Processing shimmer — sweeps the full card width for ALL active statuses */}
       {isAnimating && (
-        <div className="relative h-0.5 bg-muted overflow-hidden" aria-hidden="true">
-          <motion.div
-            className="absolute top-0 h-full w-1/3 bg-amber-400/80 rounded-full"
-            initial={{ left: '-33%' }}
-            animate={{ left: ['-33%', '100%'] }}
-            transition={{
-              duration: 1.4,
-              repeat: Infinity,
-              repeatDelay: 0.2,
-              ease: 'easeInOut',
-            }}
+        <div className="relative h-0.5 w-full bg-muted overflow-hidden" aria-hidden="true">
+          <div
+            className="absolute top-0 h-full w-1/3 bg-amber-400/80 rounded-full animate-shimmer-sweep"
           />
         </div>
       )}

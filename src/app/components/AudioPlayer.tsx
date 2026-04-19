@@ -83,8 +83,12 @@ export function AudioPlayer({ audioUrl, fileName }: AudioPlayerProps) {
               aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
               onChange={(e) => seekByPercent(Number(e.target.value))}
               onKeyDown={handleProgressKeyDown}
-              className="w-full h-1.5 appearance-none rounded-full bg-muted cursor-pointer
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="
+                w-full h-1.5 appearance-none rounded-full bg-muted cursor-pointer accent-primary
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary
+                [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-none
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+              "
               style={{
                 background: `linear-gradient(to right, var(--color-primary) ${progress}%, var(--color-muted) ${progress}%)`,
               }}

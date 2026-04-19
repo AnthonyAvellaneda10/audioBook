@@ -18,8 +18,8 @@ export default function App() {
   };
 
   // Fire-and-forget: let each upload run in background so users can queue multiple files
-  const handleUpload = (file: File) => {
-    startUpload(file);
+  const handleUpload = (file: File, targetLanguage: string) => {
+    startUpload(file, targetLanguage);
   };
 
   return (

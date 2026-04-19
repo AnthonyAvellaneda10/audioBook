@@ -12,6 +12,7 @@ AudioBook AI is a modern web application that converts any document (PDF, Word, 
 - **Active Polling** — In-progress jobs are individually polled every 10 seconds for granular status updates.
 - **Skeleton Screens** — Smooth loading placeholders while history loads, preventing layout jumps.
 - **Shimmer Progress Bar** — Animated indicator on every processing card for any non-terminal status.
+- **Multilingual Translation** — Choose from 5 target languages before converting your audiobook.
 - **Audio URL Refresh** — Pre-signed audio URLs are automatically refreshed before playback if they are older than 55 minutes.
 - **Integrated Audio Player** — Listen to generated audiobooks directly in the browser.
 
@@ -47,7 +48,7 @@ VITE_API_STATUS_URL=https://<api-id>.execute-api.<region>.amazonaws.com/prod/sta
 ### 3. AWS Backend Requirements
 
 **API Gateway / Lambda:**
-- `POST /convert` — Accepts `{ fileName, fileType, fileSize }`. Returns `{ uploadUrl, jobId }`.
+- `POST /convert` — Accepts `{ fileName, fileType, fileSize, targetLanguage }`. Returns `{ uploadUrl, jobId }`.
 - `GET /status?jobId=<id>` — Returns a single job's status.
 - `GET /status?limit=10&startKey=...&startAt=...` — Returns a paginated job history.
 

@@ -1,4 +1,4 @@
-import type { KeyboardEvent, RefObject } from 'react';
+import { useState, type KeyboardEvent, type RefObject } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { CloudUpload, UploadCloud } from 'lucide-react';
 import { useFileUpload } from '../../hooks/useFileUpload';
@@ -8,9 +8,17 @@ import { FilePreview } from './FilePreview';
 import { cn } from './ui/utils';
 
 interface FileUploadZoneProps {
-  onUpload: (file: File) => void;
+  onUpload: (file: File, targetLanguage: string) => void;
   sectionRef?: RefObject<HTMLElement>;
 }
+
+const LANGUAGE_OPTIONS = [
+  { value: 'es', label: 'Spanish' },
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'French' },
+  { value: 'it', label: 'Italian' },
+  { value: 'pt', label: 'Portuguese' },
+];
 
 export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
   const {
@@ -26,14 +34,23 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
     openFilePicker,
   } = useFileUpload();
 
+  const [targetLanguage, setTargetLanguage] = useState<string>('');
+  const [langError, setLangError] = useState<string | null>(null);
+
   const handleUpload = () => {
+    if (!targetLanguage) {
+      setLangError('Por favor, elige el idioma de salida antes de convertir.');
+      return;
+    }
+    setLangError(null);
     if (selectedFile) {
-      onUpload(selectedFile);
+      onUpload(selectedFile, targetLanguage);
       clearFile();
+      setTargetLanguage(''); // Reset after upload
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if ((e.key === 'Enter' || e.key === ' ') && !selectedFile) {
       e.preventDefault();
       openFilePicker();
@@ -47,6 +64,7 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
     "hover:opacity-90 hover:shadow-lg hover:shadow-primary/20",
     "active:opacity-80",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+    (!selectedFile || !targetLanguage) && "opacity-50 cursor-not-allowed hover:opacity-50 hover:shadow-none"
   );
 
   const uploadBtnLabel = selectedFile 
@@ -74,8 +92,9 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
       </div>
 
       {/* Drop zone */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         aria-label="Drag and drop your file here, or press Enter to browse"
         aria-describedby={validationError ? 'upload-error' : undefined}
         onDragOver={handleDragOver}
@@ -167,11 +186,11 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
             </motion.div>
           )}
         </AnimatePresence>
-      </button>
+      </div>
 
       {/* Validation error */}
       <AnimatePresence>
-        {validationError && (
+        {(validationError || langError) && (
           <motion.div
             key="error"
             initial={{ opacity: 0, height: 0, marginTop: 0 }}
@@ -181,15 +200,18 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
           >
             <AlertMessage
               id="upload-error"
-              message={validationError.message}
+              message={validationError?.message || langError!}
               variant="error"
-              onDismiss={clearFile}
+              onDismiss={() => {
+                if (validationError) clearFile();
+                if (langError) setLangError(null);
+              }}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Upload button */}
+      {/* Language Selection and Upload Button */}
       <AnimatePresence>
         {selectedFile && (
           <motion.div
@@ -197,13 +219,50 @@ export function FileUploadZone({ onUpload, sectionRef }: FileUploadZoneProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2 }}
-            className="mt-4"
+            className="mt-6 space-y-4"
           >
+            <div className="flex flex-col gap-2">
+              <label 
+                htmlFor="target-language" 
+                className="text-sm font-medium text-foreground ml-1"
+              >
+                In what language do you want your audio?
+              </label>
+              <select
+                id="target-language"
+                value={targetLanguage}
+                onChange={(e) => {
+                  setTargetLanguage(e.target.value);
+                  if (e.target.value) setLangError(null);
+                }}
+                className={cn(
+                  "w-full p-3 rounded-xl border border-border bg-card text-foreground text-sm outline-none",
+                  "focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary transition-all",
+                  "appearance-none cursor-pointer"
+                )}
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em',
+                  paddingRight: '2.5rem'
+                }}
+              >
+                <option value="" disabled>Select a language...</option>
+                {LANGUAGE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button 
               type="button"
               onClick={handleUpload} 
               aria-label={uploadBtnLabel} 
               className={uploadBtnClass}
+              disabled={!targetLanguage}
             >
               <UploadCloud size={16} aria-hidden="true" />
               Convert to Audiobook

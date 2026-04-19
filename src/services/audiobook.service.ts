@@ -16,14 +16,16 @@ export const audiobookService = {
   getUploadUrl: async (
     fileName: string,
     fileType: string,
-    fileSize: number
+    fileSize: number,
+    targetLanguage: string
   ): Promise<UploadUrlResponse> => {
-    console.log('[audiobookService] Requesting upload URL:', { fileName, fileType, fileSize });
+    console.log('[audiobookService] Requesting upload URL:', { fileName, fileType, fileSize, targetLanguage });
     const response = await fetch(CONVERT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, fileType, fileSize }),
+      body: JSON.stringify({ fileName, fileType, fileSize, targetLanguage }),
     });
+
     console.log('[audiobookService] Response status:', response.status, response.statusText);
     if (!response.ok) {
       const errorText = await response.text();
