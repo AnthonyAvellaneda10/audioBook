@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useProcessingList } from '../hooks/useProcessingList';
+import { useAuth } from '../hooks/useAuth';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { FileUploadZone } from './components/FileUploadZone';
@@ -8,7 +9,9 @@ import { ProcessingList } from './components/ProcessingList';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
-  const { items, startUpload, removeItem, nextPage, loadingMore, loadMore } = useProcessingList();
+  const { user, isLoading: authIsLoading } = useAuth();
+  const currentUserEmail = user?.email || "GUEST";
+  const { items, startUpload, removeItem, nextPage, loadingMore, loadMore } = useProcessingList(currentUserEmail, authIsLoading);
 
   // Ref to scroll to the upload section when CTA is clicked
   const uploadSectionRef = useRef<HTMLElement>(null);

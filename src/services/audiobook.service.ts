@@ -17,13 +17,14 @@ export const audiobookService = {
     fileName: string,
     fileType: string,
     fileSize: number,
-    targetLanguage: string
+    targetLanguage: string,
+    userEmail?: string
   ): Promise<UploadUrlResponse> => {
-    console.log('[audiobookService] Requesting upload URL:', { fileName, fileType, fileSize, targetLanguage });
+    console.log('[audiobookService] Requesting upload URL:', { fileName, fileType, fileSize, targetLanguage, userEmail });
     const response = await fetch(CONVERT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, fileType, fileSize, targetLanguage }),
+      body: JSON.stringify({ fileName, fileType, fileSize, targetLanguage, userEmail }),
     });
 
     console.log('[audiobookService] Response status:', response.status, response.statusText);
@@ -83,11 +84,13 @@ export const audiobookService = {
   getHistory: async (opts?: {
     startKey?: string;
     startAt?: string;
+    userEmail?: string;
   }): Promise<PaginatedResponse> => {
     const url = new URL(STATUS_URL);
     url.searchParams.append('limit', PAGE_LIMIT.toString());
     if (opts?.startKey) url.searchParams.append('startKey', opts.startKey);
     if (opts?.startAt) url.searchParams.append('startAt', opts.startAt);
+    if (opts?.userEmail) url.searchParams.append('userEmail', opts.userEmail);
     console.log('[audiobookService] Fetching history:', url.toString());
     const response = await fetch(url.toString());
     if (!response.ok) {

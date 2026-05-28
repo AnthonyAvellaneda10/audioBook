@@ -63,7 +63,7 @@ function fromApiItem(raw: ProcessingStatusResponse): AudiobookItem {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useProcessingList() {
+export function useProcessingList(userEmail: string = "GUEST", authIsLoading: boolean = false) {
   // null = initial loading, [] = loaded but empty, [...] = has data
   const [items, setItems]             = useState<AudiobookItem[] | null>(null);
   const [nextPage, setNextPage]       = useState<PaginationMetadata | undefined>(undefined);
@@ -158,11 +158,12 @@ export function useProcessingList() {
    */
   const fetchHistory = useCallback(async (isBackgroundRefresh = false) => {
     if (!isBackgroundRefresh) {
-      console.log('[useProcessingList] Fetching initial history');
+      console.log('[useProcessingList] Fetching initial history for user:', userEmail);
+      setItems(null); // Show loading skeleton on change of userEmail
     }
     setHistoryError(null);
     try {
-      const resp: PaginatedResponse = await audiobookService.getHistory();
+      const resp: PaginatedResponse = await audiobookService.getHistory({ userEmail });
       const mapped = resp.items.map(fromApiItem);
 
       if (isBackgroundRefresh) {
@@ -178,19 +179,23 @@ export function useProcessingList() {
       setHistoryError(msg);
       if (!isBackgroundRefresh) setItems([]); // exit null/loading state
     }
-  }, [mergeItems]);
+  }, [mergeItems, userEmail]);
 
-  // Initial fetch on mount
-  useEffect(() => { fetchHistory(false); }, [fetchHistory]);
+  // Initial fetch on mount / userEmail change
+  useEffect(() => {
+    if (authIsLoading) return;
+    fetchHistory(false);
+  }, [fetchHistory, authIsLoading]);
 
   // Background refresh every 30 s (catches jobs from other tabs)
   useEffect(() => {
+    if (authIsLoading) return;
     const id = setInterval(() => {
       console.log('[useProcessingList] Background history refresh');
       fetchHistory(true);
     }, HISTORY_REFRESH_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [fetchHistory]);
+  }, [fetchHistory, authIsLoading]);
 
   // ── Load More (pagination) ─────────────────────────────────────────────────
 
@@ -199,7 +204,10 @@ export function useProcessingList() {
     setLoadingMore(true);
     console.log('[useProcessingList] Loading more with', nextPage);
     try {
-      const resp: PaginatedResponse = await audiobookService.getHistory(nextPage);
+      const resp: PaginatedResponse = await audiobookService.getHistory({
+        ...nextPage,
+        userEmail
+      });
       mergeItems(resp.items.map(fromApiItem), false);
       setNextPage(resp.nextPage);
     } catch (err) {
@@ -207,13 +215,13 @@ export function useProcessingList() {
     } finally {
       setLoadingMore(false);
     }
-  }, [nextPage, loadingMore, mergeItems]);
+  }, [nextPage, loadingMore, mergeItems, userEmail]);
 
   // ── Upload flow ────────────────────────────────────────────────────────────
 
   const startUpload = useCallback(
     async (file: File, targetLanguage: string) => {
-      console.log('[useProcessingList] Starting upload for:', file.name, 'in', targetLanguage);
+      console.log('[useProcessingList] Starting upload for:', file.name, 'in', targetLanguage, 'as user:', userEmail);
 
       const localId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
@@ -235,7 +243,8 @@ export function useProcessingList() {
           file.name,
           file.type,
           file.size,
-          targetLanguage
+          targetLanguage,
+          userEmail
         );
 
         upsertItem({ id: localId, jobId });
@@ -252,7 +261,7 @@ export function useProcessingList() {
         upsertItem({ id: localId, status: 'error', error: message });
       }
     },
-    [upsertItem, pollJob]
+    [upsertItem, pollJob, userEmail]
   );
 
   // ── Audio URL freshness ────────────────────────────────────────────────────
