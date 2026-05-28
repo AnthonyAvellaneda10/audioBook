@@ -5,6 +5,9 @@ AudioBook AI is a modern web application that converts any document (PDF, Word, 
 ## 🚀 Features
 
 - **Multi-format Support** — Convert PDF, DOCX, TXT, PNG, and JPG files.
+- **Cognito OIDC Authentication** — Premium user authentication flow using `react-oidc-context` and `oidc-client-ts`.
+- **Hybrid Session History** — Sinks audiobooks to `/status?userEmail=<emailReal>` when signed in, falling back to `/status?userEmail=GUEST` for anonymous sessions.
+- **Redirection UX Enhancements** — Fully responsive login state management with spinning loaders and smart skeletons to eliminate layouts shifts and flashes of guest data.
 - **Serverless Architecture** — AWS Lambda + API Gateway + S3 + DynamoDB + AWS Polly.
 - **S3 Pre-signed URL Upload** — Files go directly to S3 from the browser (no Lambda size limits).
 - **Paginated History** — Persistent job history loaded from DynamoDB with a "Load More" pagination control.
@@ -18,7 +21,7 @@ AudioBook AI is a modern web application that converts any document (PDF, Word, 
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18, Vite, TypeScript
+- **Frontend**: React 18, Vite, TypeScript, react-oidc-context, oidc-client-ts
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 - **Styling**: Tailwind CSS
@@ -34,23 +37,31 @@ npm install
 
 ### 2. Configure Environment Variables
 
-Copy `.env.example` to `.env` and fill in your AWS API Gateway endpoints:
+Copy `.env.example` to `.env` and fill in your AWS API Gateway endpoints and AWS Cognito parameters:
 
 ```bash
 cp .env.example .env
 ```
 
 ```env
+# API Configuration
 VITE_API_CONVERT_URL=https://<api-id>.execute-api.<region>.amazonaws.com/prod/convert
 VITE_API_STATUS_URL=https://<api-id>.execute-api.<region>.amazonaws.com/prod/status
+
+# Cognito Configuration
+VITE_COGNITO_AUTHORITY=https://cognito-idp.<region>.amazonaws.com/<user-pool-id>
+VITE_COGNITO_CLIENT_ID=<your-app-client-id>
+VITE_COGNITO_REDIRECT_URI=http://localhost:5173
+VITE_COGNITO_LOGOUT_URI=http://localhost:5173
+VITE_COGNITO_DOMAIN=https://<your-user-pool-domain>.auth.<region>.amazoncognito.com
 ```
 
 ### 3. AWS Backend Requirements
 
 **API Gateway / Lambda:**
-- `POST /convert` — Accepts `{ fileName, fileType, fileSize, targetLanguage }`. Returns `{ uploadUrl, jobId }`.
+- `POST /convert` — Accepts `{ fileName, fileType, fileSize, targetLanguage, userEmail }`. Returns `{ uploadUrl, jobId }`.
 - `GET /status?jobId=<id>` — Returns a single job's status.
-- `GET /status?limit=10&startKey=...&startAt=...` — Returns a paginated job history.
+- `GET /status?limit=10&userEmail=<email>&startKey=...&startAt=...` — Returns a paginated job history filtered by userEmail (or `"GUEST"`).
 
 **S3 Bucket CORS** (required for direct browser uploads):
 ```json
